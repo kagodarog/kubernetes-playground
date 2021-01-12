@@ -1,0 +1,275 @@
+#Nginx app
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: nginx-deployment
+    labels:
+      app: nginxapp
+spec:
+   replicas: 2
+   selector:
+     matchLabels:
+       app: nginxapp
+   template:
+     metadata:
+       labels:
+        app: nginxapp
+     spec:
+        containers:
+          - name: nginx
+            image: nginx:1.16.0-alpine
+            resources:
+              limits:
+                memory: "128Mi"
+                cpu: "500m"
+            imagePullPolicy: IfNotPresent   
+            ports: 
+             - containerPort: 80
+          
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: nginx-service
+spec:
+    selector:
+     app: nginxapp
+    ports:
+       - protocol: TCP
+         port: 8080
+         targetPort: 80
+    type: LoadBalancer
+
+#Nginx ends
+
+#Mongo db and express configurations
+
+#Mongodb secret setup
+--- 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mydb-secrets
+type: Opaque
+data:
+    mongo-root-username: dXNlcm5hbWU=
+    mongo-root-password:  cGFzc3dvcmQ=
+
+#Mongodb ConfigMap setup
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-configmap
+data:
+  database_url: mymongo-db
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-mongodb-deployment
+spec:
+  selector:
+    matchLabels:
+      app: mydb
+  template:
+    metadata:
+      labels:
+        app: mydb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.2
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+               name: mydb-secrets
+               key: mongo-root-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+               name: mydb-secrets
+               key: mongo-root-password
+#mongo db service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mymongo-db
+spec:
+  selector:
+    app: mydb
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
+
+#mongoexpress deployment    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-mongo-express
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-mongo-express
+  template:
+    metadata:
+      labels:
+        app: my-mongo-express
+    spec:
+      containers:
+      - name: my-mongo-express
+        image: mongo-express
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081
+        env:
+          - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mydb-secrets
+                key: mongo-root-username
+          - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mydb-secrets
+                key: mongo-root-password      
+          - name: ME_CONFIG_MONGODB_SERVER
+            valueFrom:
+              configMapKeyRef:
+                name: mongo-configmap
+                key: database_url      
+
+
+#mongo express service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mymongo-express
+spec:
+  selector:
+    app: my-mongo-express
+  ports:
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081    
+    #nodePort: 30000
+  type: LoadBalancer            
+
+
+#dashboard admin user
+--- 
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard 
+
+---  
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+
+
+#you can access external services in different namespaces
+#configmap and secrets are created per namespace
+#volumes and nodes don't belong to any namespace.
+#you can list them by 
+#kubectl list api-resources --namespaces=false
+#e.g
+
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: myapp
+# data:
+#   db_url: mysql-service.database  # where database is the mysql service namespace
+
+
+#Ingress Controller
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-ingress
+  namespace: kubernetes-dashboard
+spec:
+  rules:
+  - host: dashboard.com
+    http:
+        paths:
+        -  pathType: Prefix
+           path: /
+           backend: 
+                serviceName: kubernetes-dashboard 
+                servicePort: 80
+      
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+ # namespace: kubernetes-dashboard
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+  - host: dashboard.com
+    http:
+        paths:
+         - pathType: Prefix
+           path: /nginx(/|$)(.*)
+           backend:
+              serviceName:  nginx-service
+              servicePort: 8080
+
+--- 
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: mymongo-express-ingress
+ # namespace: kubernetes-dashboard
+  annotations:
+      #nginx.ingress.kubernetes.io/rewrite-target: /$2
+      nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  rules:
+  - host: mongo.dashboard.com
+    http:
+        paths:
+         - pathType: Prefix
+           path:  / #/(mongo-express|public)(/|$)(.*)
+           backend:
+              serviceName:  mymongo-express
+              servicePort: 8081                               
+
+#prometheus
+#kubectl apply --kustomize github.com/kubernetes/ingress-nginx/deploy/prometheus/
