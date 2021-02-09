@@ -1,0 +1,18 @@
+# see https://rancher.com/docs/k3s/latest/en/helm/
+# see https://github.com/kubernetes/ingress-nginx/tree/master/charts/ingress-nginx
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: ingress-controller-nginx
+  namespace: kube-system
+spec:
+  repo: https://kubernetes.github.io/ingress-nginx
+  chart: ingress-nginx
+  version: 3.22.0
+  targetNamespace: kube-system
+  set:
+    controller.metrics.enabled: "true"
+    controller.metrics.serviceMonitor.enabled: "true"
+    controller.metrics.serviceMonitor.namespace: "kube-system"
+    controller.metrics.serviceMonitor.additionalLabels.release: "prometheus"
+    controller.metrics.serviceMonitor.endpoints.path: "/metrics"

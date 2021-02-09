@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    meta.helm.sh/release-name: ingress-controller-nginx
+    meta.helm.sh/release-namespace: kube-system
+  creationTimestamp: '2021-02-08T00:27:53Z'
+  generation: 6
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-controller-nginx
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/version: 0.43.0
+    helm.sh/chart: ingress-nginx-3.22.0
+    release: prometheus
+  name: ingress-controller-nginx-ingress-nginx-controller
+  namespace: kube-system
+  resourceVersion: '43987'
+  uid: 45b4a4ca-684e-4793-b29e-2ae8200c9f10
+spec:
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - kube-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: ingress-controller-nginx
+      app.kubernetes.io/name: ingress-nginx

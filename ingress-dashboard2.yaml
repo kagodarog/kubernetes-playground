@@ -1,0 +1,23 @@
+#Ingress Controller
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kube-dashboard-ingress
+  namespace: kubernetes-dashboard
+  annotations:
+    #nginx.ingress.kubernetes.io/rewrite-target: /$2
+    # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    # traefik.ingress.kubernetes.io/router.tls: "true"
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  #- host: tegasdashboard.com
+  - host: tegasdashboard.com
+    http:
+        paths:
+        -  pathType: Prefix
+           path: /
+           backend: 
+                serviceName: kubernetes-dashboard 
+                servicePort: 800

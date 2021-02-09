@@ -1,0 +1,94 @@
+#Nginx app
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#     name: nginx-deployment
+#     labels:
+#       app: nginxapp
+# spec:
+#    replicas: 2
+#    selector:
+#      matchLabels:
+#        app: nginxapp
+#    template:
+#      metadata:
+#        labels:
+#         app: nginxapp
+#      spec:
+#         containers:
+#           - name: nginx
+#             image: nginx:1.16.0-alpine
+#             resources:
+#               limits:
+#                 memory: "128Mi"
+#                 cpu: "500m"
+#             imagePullPolicy: IfNotPresent   
+#             ports: 
+#              - containerPort: 80
+#         imagePullSecrets:
+#           - name: default     
+          
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#     name: nginx-service
+# spec:
+#     selector:
+#      app: nginxapp
+#     ports:
+#        - protocol: TCP
+#          port: 8080
+#          targetPort: 80
+#     type: ClusterIP
+
+#Nginx ends
+
+#Ingress Controller
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cockpit-on-nginx-ingress
+  annotations:
+    #nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    # traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    # traefik.ingress.kubernetes.io/router.tls: "true"
+    # kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  #- host: nginx.dashboard.com
+  - host: cockpit.tegasdashboard.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: cockpit
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: grafana.tegasdashboard.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: prometheus-grafana
+            port:
+              number: 80
+        path: /
+        pathType: Prefix      
+  - host: prom.tegasdashboard.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: prometheus-kube-prometheus-prometheus
+            port:
+              number: 9000
+        path: /
+        pathType: Prefix      

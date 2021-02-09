@@ -1,0 +1,10 @@
+awamoapps/
+.vscode
+.ipynb_checkpoints/
+k3d-env-bootstrap-bak.sh
+kubernetes-dashboard.yaml
+ingress-nginx/
+helm-ingress-nginx/
+word-press-mysql-playground/mysql-data/*
+word-press-mysql-playground/wordpress-data/*
+

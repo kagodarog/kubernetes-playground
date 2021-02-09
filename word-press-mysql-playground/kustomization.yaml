@@ -1,0 +1,5 @@
+resources:
+- mysql-wordpress-secret.yaml
+- mysql-wordpress-pv.yaml
+- mysql-deployment.yaml
+- wordpress-deployment.yaml

@@ -1,0 +1,14 @@
+# see https://rancher.com/docs/k3s/latest/en/helm/
+# see https://github.com/traefik/traefik-helm-chart
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: ingress-controller-traefik
+  namespace: kube-system
+spec:
+  repo: https://helm.traefik.io/traefik
+  chart: traefik
+  version: 9.8.0
+  targetNamespace: kube-system
+  set:
+      ssl.insecureSkipVerify: "true"

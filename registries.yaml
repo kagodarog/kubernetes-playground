@@ -1,0 +1,19 @@
+# more info here https://k3d.io/usage/guides/registries
+# https://rancher.com/docs/k3s/latest/en/installation/private-registry/
+mirrors:
+  "docker.io":
+    endpoint:
+      - http://host.k3d.internal:5000
+  "host.k3d.internal:5000":
+    endpoint:
+      - http://host.k3d.internal:5000
+# Authentication and TLS can be added
+# configs:
+#  "host.k3d.internal:5000":
+#    auth:
+#      username: myname
+#      password: mypwd     
+#    tls:
+#        we will mount "my-company-root.pem" 
+#        in the /etc/ssl/certs/ directory.
+#      ca_file: "/etc/ssl/certs/my-company-root.pem" 

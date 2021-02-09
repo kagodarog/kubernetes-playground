@@ -1,0 +1,142 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    cronjob.kubernetes.io/instantiate: manual
+  creationTimestamp: "2021-02-06T20:53:52Z"
+  labels:
+    job-name: cron-ecr-renew-demo-manual-skq
+  managedFields:
+  - apiVersion: batch/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:cronjob.kubernetes.io/instantiate: {}
+      f:spec:
+        f:backoffLimit: {}
+        f:completions: {}
+        f:parallelism: {}
+        f:template:
+          f:spec:
+            f:containers:
+              k:{"name":"ecr-renew"}:
+                .: {}
+                f:env:
+                  .: {}
+                  k:{"name":"AWS_ACCESS_KEY_ID"}:
+                    .: {}
+                    f:name: {}
+                    f:valueFrom:
+                      .: {}
+                      f:secretKeyRef:
+                        .: {}
+                        f:key: {}
+                        f:name: {}
+                  k:{"name":"AWS_REGION"}:
+                    .: {}
+                    f:name: {}
+                    f:valueFrom:
+                      .: {}
+                      f:secretKeyRef:
+                        .: {}
+                        f:key: {}
+                        f:name: {}
+                  k:{"name":"AWS_SECRET_ACCESS_KEY"}:
+                    .: {}
+                    f:name: {}
+                    f:valueFrom:
+                      .: {}
+                      f:secretKeyRef:
+                        .: {}
+                        f:key: {}
+                        f:name: {}
+                  k:{"name":"DOCKER_SECRET_NAME"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"TARGET_NAMESPACE"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+            f:dnsPolicy: {}
+            f:restartPolicy: {}
+            f:schedulerName: {}
+            f:securityContext: {}
+            f:serviceAccount: {}
+            f:serviceAccountName: {}
+            f:terminationGracePeriodSeconds: {}
+    manager: dashboard
+    operation: Update
+    time: "2021-02-06T20:53:52Z"
+  - apiVersion: batch/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:completionTime: {}
+        f:conditions:
+          .: {}
+          k:{"type":"Complete"}:
+            .: {}
+            f:lastProbeTime: {}
+            f:lastTransitionTime: {}
+            f:status: {}
+            f:type: {}
+        f:startTime: {}
+        f:succeeded: {}
+    manager: k3s
+    operation: Update
+    time: "2021-02-06T20:54:29Z"
+  name: cron-ecr-renew-demo-manual-skq
+  namespace: default
+  resourceVersion: "3088"
+spec:
+  backoffLimit: 6
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        job-name: cron-ecr-renew-demo-manual-skq
+    spec:
+      containers:
+      - env:
+        - name: DOCKER_SECRET_NAME
+          value: default
+        - name: TARGET_NAMESPACE
+          value: default
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              key: REGION
+              name: ecr-renew-cred-demo
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: ID
+              name: ecr-renew-cred-demo
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: SECRET
+              name: ecr-renew-cred-demo
+        image: nabsul/k8s-ecr-login-renew:latest
+        imagePullPolicy: Always
+        name: ecr-renew
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: OnFailure
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: svc-ecr-renew-demo
+      serviceAccountName: svc-ecr-renew-demo
+      terminationGracePeriodSeconds: 30
