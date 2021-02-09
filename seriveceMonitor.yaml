@@ -4,7 +4,6 @@ metadata:
   annotations:
     meta.helm.sh/release-name: ingress-controller-nginx
     meta.helm.sh/release-namespace: kube-system
-  creationTimestamp: '2021-02-08T00:27:53Z'
   generation: 6
   labels:
     app.kubernetes.io/component: controller
@@ -17,7 +16,6 @@ metadata:
   name: ingress-controller-nginx-ingress-nginx-controller
   namespace: kube-system
   resourceVersion: '43987'
-  uid: 45b4a4ca-684e-4793-b29e-2ae8200c9f10
 spec:
   endpoints:
     - interval: 30s

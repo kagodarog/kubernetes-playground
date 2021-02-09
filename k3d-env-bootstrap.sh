@@ -128,6 +128,7 @@ helm repo update
 
 #install chart
 helm install prometheus prometheus-community/kube-prometheus-stack
+kubectl apply -f serviceMonitor.yaml
 
 sleep 10
 kubectl describe secret $secretname -n kubernetes-dashboard
