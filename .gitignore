@@ -1,10 +1,10 @@
 awamoapps/
 .vscode
-.ipynb_checkpoints
+.ipynb_checkpoints/
 k3d-env-bootstrap-bak.sh
-kubernetes-dashboard.yaml
+kubernetes-dashboard.yml
 ingress-nginx/
 helm-ingress-nginx/
 word-press-mysql-playground/mysql-data/*
 word-press-mysql-playground/wordpress-data/*
-
+erc-login/.deploy_ecr-cron.yaml.swp
