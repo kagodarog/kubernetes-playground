@@ -1,6 +1,6 @@
 awamoapps/
 .vscode
-.ipynb_checkpoints/
+.ipynb_checkpoints
 k3d-env-bootstrap-bak.sh
 kubernetes-dashboard.yaml
 ingress-nginx/
